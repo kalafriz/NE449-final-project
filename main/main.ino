@@ -17,15 +17,16 @@ bool sustain = false;
 byte lastNote = 0;
 
 const int MIDI_SAMPLE_RATE = 10; // Hz
-const int timeLen = 30 * MIDI_SAMPLE_RATE;
+const int duration = 10;
+const int timeLen = duration * MIDI_SAMPLE_RATE;
 
 //{randMute, randSound, randCtrl, patMute, patSound, patCtrl};
 //int patMute[timeLen] = {50};
-int pattern[timeLen] = {50}
-
-short data[timeLen] = {0};
+int pattern[duration] = {48, 48, 0, 52, 53, 53, 53, 0, 50, 48};
+int data[timeLen] = {0};
 
 int targets[4] = {48,50,52,53};
+
 bool targetStates[4] = {false};
 
 enum trials {rMute, rSound, rCtrl, pMute, pSound, pCtrl};
@@ -39,26 +40,45 @@ void setup(){
   Serial.begin(31250);
   pinMode(13,OUTPUT);
   digitalWrite(13,LOW);
+  
+  pinMode(T1_PIN,OUTPUT);
+  pinMode(T2_PIN,OUTPUT);
+  pinMode(T3_PIN,OUTPUT);
+  pinMode(T4_PIN,OUTPUT);
 }
 
 void loop(){
   delay(500);
   unsigned long tic;   
-
-
-  // ----------- TRIAL RUNTIME --------------------------
+  
+  // ----------- TRAINING RUNTIME --------------------------
+  while(time < duration){
+    tic = millis(); 
+    timePrev = time;    
+    time = (int)((tic)/(1000)); // time -> pattern data index (1Hz)
+    if (time > timePrev){ // checking against sampling rate time
+      tensOut(pattern[time-1]); 
+    }     
+  }
+  digitalWrite(T1_PIN, LOW); 
+  digitalWrite(T2_PIN, LOW); 
+  digitalWrite(T3_PIN, LOW); 
+  digitalWrite(T4_PIN, LOW); 
+  /*
+  // ----------- PLAY TRIAL RUNTIME --------------------------
   while(time < timeLen){
     tic = millis(); 
     unsigned long toc = millis();
     timePrev = time;    
     time = (int)((tic)/(1000/MIDI_SAMPLE_RATE)); // time -> trial data index
-    if (time > timePrev){
-      short val = 1000*targetStates[0]+100*targetStates[1]+10*targetStates[2]+targetStates[3];
+    if (time > timePrev){ // checking against sampling rate time
+      int val = 1000*targetStates[0]+100*targetStates[1]+10*targetStates[2]+targetStates[3];
       data[time] = val;  
       byte note = getMIDI();
       Serial.println(data[time]);  
     }     
   }
+  */
     
   trial ++;  
   delay(100);
@@ -111,4 +131,21 @@ byte getMIDI(){
     //Serial.println(velocityByte);
   }
   return 0;
+}
+
+void tensOut(int note){
+  Serial.println(note);
+  digitalWrite(T1_PIN, LOW); 
+  digitalWrite(T2_PIN, LOW); 
+  digitalWrite(T3_PIN, LOW); 
+  digitalWrite(T4_PIN, LOW); 
+  if (note == targets[0]){
+    digitalWrite(T1_PIN, HIGH);   
+  } else if (note == targets[1]){
+    digitalWrite(T2_PIN, HIGH);   
+  } else if (note == targets[2]){
+    digitalWrite(T3_PIN, HIGH);   
+  } else if (note == targets[3]){
+    digitalWrite(T4_PIN, HIGH);   
+  }
 }
