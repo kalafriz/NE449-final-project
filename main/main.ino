@@ -50,7 +50,7 @@ void setup(){
 void loop(){
   delay(500);
   unsigned long tic;   
-  
+  /*
   // ----------- TRAINING RUNTIME --------------------------
   while(time < duration){
     tic = millis(); 
@@ -64,7 +64,7 @@ void loop(){
   digitalWrite(T2_PIN, LOW); 
   digitalWrite(T3_PIN, LOW); 
   digitalWrite(T4_PIN, LOW); 
-  /*
+  /*/
   // ----------- PLAY TRIAL RUNTIME --------------------------
   while(time < timeLen){
     tic = millis(); 
@@ -72,13 +72,13 @@ void loop(){
     timePrev = time;    
     time = (int)((tic)/(1000/MIDI_SAMPLE_RATE)); // time -> trial data index
     if (time > timePrev){ // checking against sampling rate time
+      byte note = getMIDI();
       int val = 1000*targetStates[0]+100*targetStates[1]+10*targetStates[2]+targetStates[3];
       data[time] = val;  
-      byte note = getMIDI();
       Serial.println(data[time]);  
     }     
   }
-  */
+  
     
   trial ++;  
   delay(100);
